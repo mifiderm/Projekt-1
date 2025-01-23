@@ -1,0 +1,77 @@
+﻿@page "/automobili"
+@using Microsoft.EntityFrameworkCore
+@using IznjamljivanjeAutomobila.Models
+@using IznjamljivanjeAutomobila.Data
+@inject AppDbContext DbContext
+
+<h3>Popis Automobila</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Marka</th>
+            <th>Model</th>
+            <th>Godina</th>
+            <th>Cijena Po Danu</th>
+            <th>Dostupan</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var auto in automobili)
+        {
+            <tr>
+                <td>@auto.Marka</td>
+                <td>@auto.Model</td>
+                <td>@auto.GodinaProizvodnje</td>
+                <td>@auto.CijenaPoDanu</td>
+                <td>@(auto.Dostupan ? "Da" : "Ne")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Dodaj Novi Automobil</h3>
+
+<EditForm Model="noviAutomobil" OnValidSubmit="DodajAutomobil">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label>Marka:</label>
+        <InputText @bind-Value="noviAutomobil.Marka" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Model:</label>
+        <InputText @bind-Value="noviAutomobil.Model" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Godina Proizvodnje:</label>
+        <InputNumber @bind-Value="noviAutomobil.GodinaProizvodnje" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Cijena Po Danu:</label>
+        <InputNumber @bind-Value="noviAutomobil.CijenaPoDanu" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Dostupan:</label>
+        <InputCheckbox @bind-Value="noviAutomobil.Dostupan" />
+    </div>
+    <button type="submit" class="btn btn-primary">Dodaj</button>
+</EditForm>
+
+@code {
+    private List<Automobil> automobili = new();
+    private Automobil noviAutomobil = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        automobili = await DbContext.Automobili.ToListAsync();
+    }
+
+    private async Task DodajAutomobil()
+    {
+        DbContext.Automobili.Add(noviAutomobil);
+        await DbContext.SaveChangesAsync();
+        automobili = await DbContext.Automobili.ToListAsync();
+        noviAutomobil = new Automobil();
+    }
+}
